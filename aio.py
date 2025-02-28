@@ -618,7 +618,7 @@ def create_teaching_plan_crew(file_paths, llm_provider="gemini"):
         )
     else:
         my_llm = LLM(
-            model='gpt-4-turbo',
+            model='gpt-4o-mini',
             api_key=os.environ.get("OPENAI_API_KEY")
         )
     
