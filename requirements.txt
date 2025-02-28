@@ -1,0 +1,10 @@
+streamlit
+python-dotenv
+python-pptx
+PyPDF2
+python-docx
+docx2txt
+crewai
+langchain
+pydantic
+litellm
