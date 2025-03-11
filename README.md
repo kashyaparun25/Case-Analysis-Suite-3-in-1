@@ -131,7 +131,4 @@ graph TD
     B --> O[API Key Configuration]
     O -.-> K
     
-    style K fill:#f9f,stroke:#333,stroke-width:2px
-    style G fill:#ccf,stroke:#333,stroke-width:2px
-    style H fill:#ccf,stroke:#333,stroke-width:2px
-    style I fill:#ccf,stroke:#333,stroke-width:2px
+```
