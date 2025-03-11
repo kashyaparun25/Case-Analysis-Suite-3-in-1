@@ -17,7 +17,7 @@ This project provides a comprehensive suite of tools for analyzing case studies,
     *   [Prerequisites](#prerequisites)
     *   [Installation Steps](#installation-steps)
     *   [API Key Configuration](#api-key-configuration)
-6.  [Usage Guide](#usage-guide)
+6.  [Usage Guide](#Usage-Guide)
     *   [File Upload](#file-upload)
     *   [Case Breakdown Generator](#case-breakdown-generator)
     *   [Teaching Plan Generator](#teaching-plan-generator)
