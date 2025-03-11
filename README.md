@@ -4,7 +4,7 @@ This project provides a comprehensive suite of tools for analyzing case studies,
 
 ## Table of Contents
 
-1.  [Introduction](#introduction)
+1.  [Introduction](#1.-introduction)
 2.  [Features](#features)
 3.  [Architecture Overview](#architecture-overview)
     *   [System Diagram](#system-diagram)
