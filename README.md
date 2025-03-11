@@ -1,98 +1,137 @@
-# 📚 Case Study Analysis Suite
+# Case Study Analysis Suite - README
 
-Welcome to the **Case Study Analysis Suite**, an integrated application designed to streamline the creation of comprehensive case study materials. This suite offers three primary functionalities:
+This project provides a comprehensive suite of tools for analyzing case studies, designed to assist educators and business professionals in extracting key insights, creating teaching materials, and generating structured analyses. The application is built using Streamlit for the user interface, CrewAI for agent orchestration, and supports both Google Gemini and OpenAI for language model capabilities.
 
-1. **Case Breakdown Generator**: Produces detailed teaching notes, also known as case breakdowns, in a well-structured DOCX format.
-2. **Teaching Plan Generator**: Develops a 2-hour lesson plan complete with introductions, analyses, group activities, and assessments, presented in Markdown format.
-3. **Board Plan Generator**: Generates a structured board plan analysis highlighting key insights and implementation details, also in Markdown format.
+## Table of Contents
 
-## Features
+1.  [Introduction](#introduction)
+2.  [Features](#features)
+3.  [Architecture Overview](#architecture-overview)
+    *   [System Diagram](#system-diagram)
+    *   [Component Breakdown](#component-breakdown)
+4.  [Agent Descriptions](#agent-descriptions)
+    *   [Case Breakdown Generator Agents](#case-breakdown-generator-agents)
+    *   [Teaching Plan Generator Agents](#teaching-plan-generator-agents)
+    *   [Board Plan Generator Agents](#board-plan-generator-agents)
+5.  [Installation and Setup](#installation-and-setup)
+    *   [Prerequisites](#prerequisites)
+    *   [Installation Steps](#installation-steps)
+    *   [API Key Configuration](#api-key-configuration)
+6.  [Usage Guide](#usage-guide)
+    *   [File Upload](#file-upload)
+    *   [Case Breakdown Generator](#case-breakdown-generator)
+    *   [Teaching Plan Generator](#teaching-plan-generator)
+    *   [Board Plan Generator](#board-plan-generator)
+    *   [Session Reset](#session-reset)
+7.  [Code Structure](#code-structure)
+    *   [Utility Functions](#utility-functions)
+    *   [Document Generator (Case Breakdown)](#document-generator-case-breakdown)
+    *   [Case Breakdown Generator](#case-breakdown-generator-1)
+    *   [Teaching Plan Generator](#teaching-plan-generator-1)
+    *   [Board Plan Generator](#board-plan-generator-1)
+    *   [Main App Interface](#main-app-interface)
+8.  [Dependencies](#dependencies)
+9.  [Troubleshooting](#troubleshooting)
+10. [Contributing](#contributing)
+11. [License](#license)
+12. [Future Enhancements](#future-enhancements)
+13. [Author](#author)
 
-- **User-Friendly Interface**: Built with Streamlit for an intuitive and responsive user experience.
-- **Multi-Format Support**: Accepts case study files in PDF, DOCX, PPT, and PPTX formats.
-- **Automated Content Generation**: Utilizes AI agents to analyze content and generate comprehensive teaching materials.
-- **Downloadable Outputs**: Provides outputs in DOCX and Markdown formats for easy integration into your teaching resources.
+## 1. Introduction
 
-## Application Architecture
+The Case Study Analysis Suite is designed to streamline the process of analyzing business case studies and generating various types of related documents. It leverages the power of AI to automate many of the tedious tasks involved in dissecting case studies, creating teaching materials, and preparing board-level analyses.  The suite supports multiple file formats (PDF, DOCX, PPT, PPTX) and provides downloadable outputs in relevant formats (DOCX, Markdown).
 
-The application is structured around specialized AI agents, each assigned specific roles and tasks to ensure a smooth and efficient workflow.
+## 2. Features
 
-### 1. Case Breakdown Generator
+*   **Case Breakdown Generator:**
+    *   Automatically extracts metadata (title, author) from the case study.
+    *   Generates a comprehensive Word document (.docx) with predefined sections: Synopsis, Learning Objectives, Teaching Strategies, Suggested Teaching Plan, Key Points, Further Insights, Discussion Questions & Answers, Assignment Exercises, Automated Conversation, and Case Suggestions.
+    *   Provides content review and scoring for each section.
+    *   Offers a structured, formatted, and customizable output.
 
-This module involves three key agents:
+*   **Teaching Plan Generator:**
+    *   Creates a detailed 2-hour teaching plan based on the uploaded case study.
+    *   Includes sections for objectives, introduction, detailed lesson breakdowns, visual aids, assessments, and conclusion.
+    *   Provides feedback and iterative refinement of the teaching plan.
+    *   Outputs a Markdown (.md) file for easy editing and use.
 
-- **Metadata Analyzer Agent**: Extracts essential metadata, such as the case study title and author(s), from the uploaded documents.
-- **Case Study Content Generator Agent**: Generates detailed content for each section of the case breakdown based on predefined templates.
-- **Content Quality Reviewer Agent**: Evaluates the generated content for quality, relevance, and depth, providing structured feedback for improvements.
+*   **Board Plan Generator:**
+    *   Analyzes the case study and creates a structured board plan suitable for presentations.
+    *   Identifies key concepts, industry suitability, benefits, implementation details, and risk assessment.
+    *   Outputs a structured JSON and presents it in a user-friendly way.  Generates a Markdown (.md) file for download.
 
-**Tasks Assigned:**
+*   **File Handling:**
+    *   Supports multiple file uploads (PDF, DOCX, PPT, PPTX).
+    *   Combines text from multiple files for comprehensive analysis.
+    *   Handles temporary file storage and cleanup.
 
-- **Create Metadata Task**: Analyzes the extracted text to identify the case study title and author(s).
-- **Create Section Task**: Generates content for each section of the case breakdown using the provided templates.
-- **Create Review Task**: Reviews the content of each section, offering feedback and scoring based on predefined criteria.
+*   **API Key Management:**
+    *   Supports both Google Gemini and OpenAI API keys.
+    *   Allows users to switch between providers.
+    *   Provides clear instructions for key configuration.
 
-### 2. Teaching Plan Generator
+*   **User Interface:**
+    *   Intuitive Streamlit-based web interface.
+    *   Tabbed layout for easy navigation between generators.
+    *   Progress indicators and status updates during processing.
+    *   Session reset functionality for starting fresh.
 
-This module comprises four agents:
+*   **Error Handling:**
+     *   Handles different types of errors like API errors, file format errors, and analysis errors.
+     *   Displays informative error messages to the user.
+     *   Handles cases with encrypted pdf files.
 
-- **Case Study Analyzer Agent**: Extracts key concepts, objectives, and data from the case study files.
-- **Teaching Plan Designer Agent**: Crafts a detailed 2-hour lesson plan incorporating introductions, analyses, group activities, and assessments.
-- **Plan Reviewer Agent**: Reviews the lesson plan for clarity, alignment with learning objectives, and student engagement, providing constructive feedback.
-- **Teaching Plan Reporter Agent**: Incorporates feedback to finalize and format the teaching plan, ensuring it meets educational standards.
+## 3. Architecture Overview
 
-**Tasks Assigned:**
+### 3.1. System Diagram
 
-- **Analyze PDF Task**: Extracts and analyzes the content of the uploaded files to identify key concepts and learning objectives.
-- **Generate Plan Task**: Designs a comprehensive 2-hour lesson plan with structured activities and assessments.
-- **Review Plan Task**: Evaluates the lesson plan's clarity, alignment with objectives, and engagement level, offering feedback for enhancements.
-- **Final Plan Task**: Integrates reviewer feedback to produce a polished and well-structured teaching plan.
+```mermaid
+graph TD
+    subgraph User Interface [Streamlit Web Application]
+        A[User] --> B(File Upload)
+        B --> C{File Processing}
+        C --> D[Text Extraction]
+        D --> E[Session Storage]
+        E --> F(Generator Selection: Case Breakdown, Teaching Plan, Board Plan)
+        F --> G[Case Breakdown Generator]
+        F --> H[Teaching Plan Generator]
+        F --> I[Board Plan Generator]
+    end
 
-### 3. Board Plan Generator
+    subgraph CrewAI Orchestration
+        G --> G1(Metadata Agent)
+        G --> G2(Content Generator Agent)
+        G --> G3(Content Reviewer Agent)
+        H --> H1(Case Study Analyzer Agent)
+        H --> H2(Teaching Plan Designer Agent)
+        H --> H3(Plan Reviewer Agent)
+        H --> H4(Teaching Plan Reporter Agent)
+        I --> I1(PDF Processor Agent)
+        I --> I2(Case Study Analyzer Agent)
+    end
 
-This module includes two agents:
+    subgraph LLM Interaction
+        G1 -.-> K(LLM: Gemini/OpenAI)
+        G2 -.-> K
+        G3 -.-> K
+        H1 -.-> K
+        H2 -.-> K
+        H3 -.-> K
+        H4 -.-> K
+        I1 -.-> K
+        I2 -.-> K
+    end
+	
+	subgraph Output
+		G3 --> L[DOCX Output]
+		H4 --> M[Markdown Output]
+		I2 --> N[Markdown/JSON Output]
+	end
 
-- **PDF Processor Agent**: Extracts and cleans text content from the uploaded case study files.
-- **Case Study Analyzer Agent**: Analyzes the cleaned content to identify key points and insights for the board plan.
-
-**Tasks Assigned:**
-
-- **Extract Text Task**: Processes the uploaded files to extract and clean text content.
-- **Analyze Case Study Task**: Evaluates the extracted content to create a structured board plan highlighting main concepts, industry context, benefits, key roles, implementation details, and risk assessments.
-
-## Getting Started
-
-To utilize the Case Study Analysis Suite:
-
-1. **API Configuration**: Enter your API key in the sidebar to enable AI functionalities.
-2. **File Upload**: Upload your case study files in PDF, DOCX, PPT, or PPTX formats.
-3. **Select Module**: Choose the desired generator tab (Case Breakdown, Teaching Plan, or Board Plan).
-4. **Generate Content**: Click the generate button and allow the application to process the files and produce the desired outputs.
-5. **Download Outputs**: Once generated, download the outputs in DOCX or Markdown formats as needed.
-
-## Dependencies
-
-The application relies on the following libraries:
-
-- `streamlit`: For building the web interface.
-- `python-docx`: For creating and manipulating Word documents.
-- `PyPDF2`: For extracting text from PDF files.
-- `python-pptx`: For handling PowerPoint files.
-- `docx2txt`: For extracting text from DOCX files.
-- `dotenv`: For loading environment variables.
-- `litellm`: For interacting with language models.
-- `langchain`: For managing AI agents and tasks.
-- `crewai`: For orchestrating AI agents and workflows.
-
-Ensure these dependencies are installed in your environment to run the application successfully.
-
-## Contributing
-
-Contributions to the Case Study Analysis Suite are welcome. If you have suggestions for improvements or encounter any issues, please submit them via the GitHub repository's issue tracker.
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
----
-
-*Created with CrewAI, Streamlit, and Gemini • Built by Arun Kashyap • © 2025*
+    B --> O[API Key Configuration]
+    O -.-> K
+    
+    style K fill:#f9f,stroke:#333,stroke-width:2px
+    style G fill:#ccf,stroke:#333,stroke-width:2px
+    style H fill:#ccf,stroke:#333,stroke-width:2px
+    style I fill:#ccf,stroke:#333,stroke-width:2px
