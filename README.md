@@ -237,8 +237,8 @@ graph TD
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/case-study-analysis-suite.git  # Replace with your repository URL
-    cd case-study-analysis-suite
+    git clone https://github.com/kashyaparun25/Case-Analysis-Suite-3-in-1.git  # Replace with your repository URL
+    cd Case-Analysis-Suite-3-in-1
     ```
 
 2.  **Create a virtual environment (recommended):**
@@ -263,7 +263,6 @@ graph TD
     *   For Google Gemini:
         ```
         GEMINI_API_KEY=your_gemini_api_key
-        GOOGLE_API_KEY=your_gemini_api_key
         ```
     *   For OpenAI:
         ```
