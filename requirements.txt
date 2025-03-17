@@ -3,7 +3,8 @@ python-pptx
 PyPDF2
 python-docx
 docx2txt
-crewai
+crewai==0.102.0
+litellm==1.60.2
 langchain
 pydantic
 litellm
