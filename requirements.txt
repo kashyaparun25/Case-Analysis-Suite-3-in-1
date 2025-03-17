@@ -7,7 +7,6 @@ crewai==0.102.0
 litellm==1.60.2
 langchain
 pydantic
-litellm
 streamlit==1.28.1
 chromadb<0.6.0
 pysqlite3-binary
