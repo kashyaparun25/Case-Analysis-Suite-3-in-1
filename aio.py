@@ -712,17 +712,19 @@ def create_teaching_plan_crew(file_paths, llm_provider="gemini"):
 
 #---------------------------- Board Plan Generator ----------------------------#
 
-class BoardPlanAnalyzer:
-    def __init__(self, llm_provider="gemini"):
-        if llm_provider == "gemini":
-            api_key = os.environ.get('GEMINI_API_KEY')
-            self.model = "gemini/gemini-2.0-flash"
-        else:
-            api_key = os.environ.get('OPENAI_API_KEY')
-            self.model = "gpt-4-turbo"
-            
-        if not api_key:
-            raise ValueError(f"{llm_provider.capitalize()} API key not found")
+def __init__(self, llm_provider="gemini"):
+    if llm_provider == "gemini":
+        api_key = os.environ.get('GEMINI_API_KEY')
+        self.model = "gemini/gemini-2.0-flash"
+    else:
+        api_key = os.environ.get('OPENAI_API_KEY')
+        self.model = "gpt-4o-mini"
+        
+    # Add debugging output
+    print(f"BoardPlanAnalyzer init - {llm_provider} API key present: {api_key is not None}")
+    
+    if not api_key:
+        raise ValueError(f"{llm_provider.capitalize()} API key not found")
             
         if llm_provider == "gemini":
             os.environ['GEMINI_API_KEY'] = api_key
@@ -908,6 +910,12 @@ if st.session_state.uploaded_files:
             if not api_key:
                 st.warning("⚠️ Please enter an API key in the sidebar before proceeding.")
             else:
+                # Add debugging code here
+                if api_key_source == "OpenAI":
+                    st.write(f"OpenAI API Key set: {'OPENAI_API_KEY' in os.environ}")
+                else:
+                    st.write(f"Gemini API Key set: {'GEMINI_API_KEY' in os.environ}")
+                    
                 # Initialize the breakdown generator
                 crew_manager = CaseBreakdownCrew(api_key)
                 
@@ -1091,6 +1099,12 @@ if st.session_state.uploaded_files:
                 # Create a button to start generation
                 if st.button("Generate Teaching Plan", key="teaching_plan_button"):
                     try:
+                        # Add debugging code here
+                        if api_key_source == "OpenAI":
+                            st.write(f"OpenAI API Key set: {'OPENAI_API_KEY' in os.environ}")
+                        else:
+                            st.write(f"Gemini API Key set: {'GEMINI_API_KEY' in os.environ}")
+                            
                         # Create placeholders for UI updates
                         progress_placeholder = st.empty()
                         agent_status_placeholder = st.empty()
@@ -1193,6 +1207,12 @@ if st.session_state.uploaded_files:
                 # Create a button to start generation
                 if st.button("Generate Board Plan", key="board_plan_button"):
                     try:
+                        # Add debugging code here
+                        if api_key_source == "OpenAI":
+                            st.write(f"OpenAI API Key set: {'OPENAI_API_KEY' in os.environ}")
+                        else:
+                            st.write(f"Gemini API Key set: {'GEMINI_API_KEY' in os.environ}")
+                            
                         # Select LLM provider
                         llm_provider = "gemini" if api_key_source == "Google (Gemini)" else "openai"
                         
