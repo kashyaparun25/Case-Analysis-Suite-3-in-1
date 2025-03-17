@@ -87,7 +87,7 @@ with st.sidebar:
         api_key = st.text_input("Enter your OpenAI API Key", type="password", 
                                 help="Required for the AI model to function")
         if api_key:
-            os.environ["OPENAI_API_KEY"] = api_key
+            
             os.environ["OPENAI_API_KEY"] = "sk-proj-123456"
             
     st.divider()
