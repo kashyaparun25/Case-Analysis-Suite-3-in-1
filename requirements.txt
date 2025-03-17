@@ -19,8 +19,6 @@ beautifulsoup4==4.13.3
 blinker==1.9.0
 build==1.2.2.post1
 cachetools==5.5.1
-# Editable install with no version control (case-breakdown-agent==0.1)
--e d:\bia_568\case_breakdown_agent
 certifi==2025.1.31
 cffi==1.17.1
 chardet==5.2.0
