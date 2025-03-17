@@ -33,6 +33,8 @@ from pydantic import BaseModel, Field
 import litellm
 from langchain.tools import Tool
 
+
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -61,7 +63,10 @@ if 'board_plan_generated' not in st.session_state:
     st.session_state.board_plan_generated = False
 
 # Load environment variables
-load_dotenv()
+#load_dotenv()
+
+
+
 
 # Page title and description
 st.title("📚 Case Study Analysis Suite")
@@ -71,25 +76,27 @@ st.write("Developed for BIA 568 (Business Intelligence and Analytics) -- Managem
 st.write("---")
 
 # Sidebar for API key configuration
+# In the sidebar section:
 with st.sidebar:
     st.title("⚙️ Configuration")
-    api_key_source = st.radio("Select API Key Provider:", 
-                            ["Google (Gemini)", "OpenAI"],
-                            help="Choose which AI provider to use")
     
-    if api_key_source == "Google (Gemini)":
-        api_key = st.text_input("Enter your Gemini API Key", type="password", 
-                                help="Required for the AI model to function")
-        if api_key:
-            os.environ["GEMINI_API_KEY"] = api_key
-            os.environ["GOOGLE_API_KEY"] = api_key
-    else:
-        api_key = st.text_input("Enter your OpenAI API Key", type="password", 
-                                help="Required for the AI model to function")
-        if api_key:
-            
-            os.environ["OPENAI_API_KEY"] = api_key
-            
+    api_key = st.text_input("Enter your Gemini API Key", type="password", 
+                          help="Required for the AI model to function")
+    if api_key:
+        os.environ["GEMINI_API_KEY"] = api_key
+        os.environ["GOOGLE_API_KEY"] = api_key
+        os.environ["LITELLM_MODEL_DEFAULT_PROVIDER"] = "gemini"
+
+        # Configure litellm
+        litellm.set_verbose = True
+        litellm_config = {
+            "model": "gemini/gemini-2.0-flash",
+            "api_key": api_key,
+            "provider": "gemini"
+        }
+    
+
+    
     st.divider()
     
     # Reset button
@@ -97,7 +104,6 @@ with st.sidebar:
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
-
 
 #---------------------------- Utility Functions ----------------------------#
 
@@ -401,7 +407,12 @@ class SectionContent(BaseModel):
 class CaseBreakdownCrew:
     def __init__(self, api_key):
         self.api_key = api_key
-        
+        self.llm = LLM(
+            model='gemini/gemini-2.0-flash',
+            api_key=self.api_key,
+            provider="gemini"
+        )
+    
     def create_metadata_agent(self):
         return Agent(
             role="Metadata Analyzer",
@@ -410,10 +421,16 @@ class CaseBreakdownCrew:
             such as titles, authors, and other publication information. You have a keen eye for
             identifying the most important and relevant document metadata, even when it's not
             explicitly labeled.""",
+            llm=LLM(
+            model='gemini/gemini-2.0-flash',
+            api_key=self.api_key,
+            provider="gemini"
+        ),
             verbose=True
         )
     
     def create_content_generator_agent(self):
+        
         return Agent(
             role="Case Study Content Generator",
             goal="Generate comprehensive case analysis content based on section requirements",
@@ -421,10 +438,12 @@ class CaseBreakdownCrew:
             You excel at breaking down complex business cases into structured, insightful content
             that highlights key learning points, strategies, and insights. You have extensive experience
             in business education and know how to create content that is valuable for teaching and learning.""",
+            llm=self.llm,
             verbose=True
         )
     
     def create_content_reviewer_agent(self):
+        
         return Agent(
             role="Content Quality Reviewer",
             goal="Evaluate and score content for quality, relevance, and depth",
@@ -432,6 +451,7 @@ class CaseBreakdownCrew:
             business case studies and educational content. You have a strong understanding of what makes
             effective case study material and can provide constructive feedback to improve content quality.
             You carefully analyze content for relevance, clarity, depth, and educational value.""",
+            llm=self.llm,
             verbose=True
         )
     
@@ -606,27 +626,18 @@ def extract_text(file_path: str) -> str:
     except Exception as e:
         return f"Error extracting text: {str(e)}"
 
-def create_teaching_plan_crew(file_paths, llm_provider="gemini"):
-    # Initialize the agent tracker
-    tracker = AgentTracker()
-    tracker.set_placeholder(st.empty())
+def create_teaching_plan_crew(file_paths):
+    # Initialize LLM 
+    my_llm = LLM(
+        model='gemini/gemini-2.0-flash',
+        api_key=os.environ.get("GEMINI_API_KEY"),
+        provider="gemini"
+    )
     
-    # Initialize LLM based on provider
-    if llm_provider == "gemini":
-        my_llm = LLM(
-            model='gemini/gemini-2.0-flash',
-            api_key=os.environ.get("GEMINI_API_KEY")
-        )
-    else:
-        my_llm = LLM(
-            model='gpt-4o-mini',
-            api_key=os.environ.get("OPENAI_API_KEY")
-        )
-    
-    # Define agents with callbacks for UI updates
+    # Create agents with Gemini configuration
     pdf_analyzer = Agent(
         role='Case Study Analyzer',
-        goal='Extract key concepts, objectives, and data from case study PDFs',
+        goal='Extract key concepts, objectives, and data from case study files',
         backstory='You are an expert in analyzing business case studies. Identify core themes, data points, and learning objectives.',
         llm=my_llm,
         tools=[extract_text],
@@ -693,7 +704,7 @@ def create_teaching_plan_crew(file_paths, llm_provider="gemini"):
                     - It should have the overall objective to start with.
                     - It should have a clear introduction
                     - It should have detailed lesson breakdowns with the time to be spent on each section and the title of the section Highlighting all the important concepts to be taught (you can use tables to highlight the concepts in a structured way)
-                    - It should have one powerful visual aid which can be a tablet That can help in better understanding for the students
+                    - It should have one powerful visual aid which can be a table That can help in better understanding for the students
                     - It can have simple assessmentsthat enables class participation engagement in brainstorming activities and such that can help in better understanding of the concepts.
                     - It should have a clear conclusion that ties back to the overall objective.
                     - Overall Plan should be around 1300 - 1500 words.""",
@@ -712,27 +723,20 @@ def create_teaching_plan_crew(file_paths, llm_provider="gemini"):
 
 #---------------------------- Board Plan Generator ----------------------------#
 
-def __init__(self, llm_provider="gemini"):
-    if llm_provider == "gemini":
+class BoardPlanAnalyzer:
+    def __init__(self):
         api_key = os.environ.get('GEMINI_API_KEY')
-        self.model = "gemini/gemini-2.0-flash"
-    else:
-        api_key = os.environ.get('OPENAI_API_KEY')
-        self.model = "gpt-4o-mini"
+        if not api_key:
+            raise ValueError("Gemini API key not found")
+            
+        self.llm = LLM(
+            model='gemini/gemini-2.0-flash',
+            api_key=api_key,
+            provider="gemini"
+        )
         
-    # Add debugging output
-    print(f"BoardPlanAnalyzer init - {llm_provider} API key present: {api_key is not None}")
-    
-    if not api_key:
-        raise ValueError(f"{llm_provider.capitalize()} API key not found")
-            
-        if llm_provider == "gemini":
-            os.environ['GEMINI_API_KEY'] = api_key
-        else:
-            os.environ['OPENAI_API_KEY'] = api_key
-            
         litellm.set_verbose = True
-        
+
         # Create agents
         self.create_agents()
 
@@ -752,6 +756,7 @@ def __init__(self, llm_provider="gemini"):
                 description="Extracts text content from PDF files"
             )],
             allow_delegation=False,
+            llm=self.llm,
             verbose=True
         )
 
@@ -768,6 +773,7 @@ def __init__(self, llm_provider="gemini"):
                 description="Analyzes case study and creates structured board plan"
             )],
             allow_delegation=False,
+            llm=self.llm,
             verbose=True
         )
 
@@ -830,10 +836,13 @@ def __init__(self, llm_provider="gemini"):
         
         try:
             response = litellm.completion(
-                model=self.model,
+                model="gemini/gemini-2.0-flash",
                 messages=messages,
+                api_key=os.environ.get("GEMINI_API_KEY"),
+                provider="gemini",
                 response_format={"type": "json_object"}
             )
+
             
             # Extract and parse the JSON response
             content = response.choices[0].message.content
@@ -910,12 +919,6 @@ if st.session_state.uploaded_files:
             if not api_key:
                 st.warning("⚠️ Please enter an API key in the sidebar before proceeding.")
             else:
-                # Add debugging code here
-                if api_key_source == "OpenAI":
-                    st.write(f"OpenAI API Key set: {'OPENAI_API_KEY' in os.environ}")
-                else:
-                    st.write(f"Gemini API Key set: {'GEMINI_API_KEY' in os.environ}")
-                    
                 # Initialize the breakdown generator
                 crew_manager = CaseBreakdownCrew(api_key)
                 
@@ -1099,12 +1102,6 @@ if st.session_state.uploaded_files:
                 # Create a button to start generation
                 if st.button("Generate Teaching Plan", key="teaching_plan_button"):
                     try:
-                        # Add debugging code here
-                        if api_key_source == "OpenAI":
-                            st.write(f"OpenAI API Key set: {'OPENAI_API_KEY' in os.environ}")
-                        else:
-                            st.write(f"Gemini API Key set: {'GEMINI_API_KEY' in os.environ}")
-                            
                         # Create placeholders for UI updates
                         progress_placeholder = st.empty()
                         agent_status_placeholder = st.empty()
@@ -1117,7 +1114,7 @@ if st.session_state.uploaded_files:
                         progress_bar = progress_placeholder.progress(0)
                         
                         # Select LLM provider
-                        llm_provider = "gemini" if api_key_source == "Google (Gemini)" else "openai"
+                        llm_provider = "gemini"
                         
                         # Update progress
                         progress_bar.progress(10)
@@ -1207,14 +1204,8 @@ if st.session_state.uploaded_files:
                 # Create a button to start generation
                 if st.button("Generate Board Plan", key="board_plan_button"):
                     try:
-                        # Add debugging code here
-                        if api_key_source == "OpenAI":
-                            st.write(f"OpenAI API Key set: {'OPENAI_API_KEY' in os.environ}")
-                        else:
-                            st.write(f"Gemini API Key set: {'GEMINI_API_KEY' in os.environ}")
-                            
                         # Select LLM provider
-                        llm_provider = "gemini" if api_key_source == "Google (Gemini)" else "openai"
+                        llm_provider = "gemini"
                         
                         # Initialize the board plan analyzer
                         analyzer = BoardPlanAnalyzer(llm_provider=llm_provider)
@@ -1339,3 +1330,4 @@ else:
 # Footer
 st.divider()
 st.caption("Created with CrewAI, Streamlit, and Gemini • Built by Arun Kashyap • © 2025")    
+
